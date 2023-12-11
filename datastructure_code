@@ -1,0 +1,51 @@
+import pandas as pd
+import heapq
+
+#csv 파일 읽기
+def read_csv(file_path):
+    #csv파일 읽어온 후 데이터프레임으로 전환, 10000을 무한대로 대체
+    df = pd.read_csv(file_path, index_col=0, encoding='cp949')
+    df.replace(10000, float('inf'), inplace=True)
+    return df
+
+#다익스트라 알고리즘
+def dijkstra(graph, start, end):
+    #최소힙을 사용한 우선순위 큐를 이용하여 최단 경로 탐색
+    #큐는 (현재까지 가중치, 현재 노드, 경로)로 구성
+    queue = [(0, start, [])]
+    visited = set() # 방문한 노드 저장
+
+    while queue:
+        (cost, node, path) = heapq.heappop(queue) #우선순위큐
+        if node not in visited: #아직 방문 전 노드인 경우
+            visited.add(node) #방문로 처리
+            path = path + [node] #경로에 현재 노드 추가
+            if node == end: #목적지에 도착한 경우 경로 반환
+                return path
+            for neighbor, c in graph[node].items():
+                heapq.heappush(queue, (cost + c, neighbor, path))
+    return [] #경로가 없으면 빈 리스트 반환
+
+#메인 함수
+def main():
+    file_path = 'projec.csv'
+    graph = read_csv(file_path)
+
+    print("출발 지점을 입력하세요.: ")
+    start_node = input()
+    print("도착 지점을 입력하세요.: ")
+    end_node = input()
+
+    if start_node not in graph.index or end_node not in graph.index:
+        print("입력한 노드가 그래프에 없습니다.")
+        return
+
+    shortest_path = dijkstra(graph, start_node, end_node)
+
+    if not shortest_path:
+        print("경로가 존재하지 않습니다.")
+    else:
+        print("최단 경로입니다. : ", shortest_path)
+
+if __name__ == "__main__":
+    main()
